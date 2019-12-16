@@ -31,6 +31,7 @@ build/
 .vscode/
 
 ### Maven ###
-/mvnw
-/mvnw.*
-/.mvn/*
+mvnw
+mvnw.*
+/.mvn
+/.mvw
