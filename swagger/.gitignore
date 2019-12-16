@@ -33,3 +33,4 @@ build/
 ### Maven ###
 /mvnw
 /mvnw.*
+/.mvn/*
