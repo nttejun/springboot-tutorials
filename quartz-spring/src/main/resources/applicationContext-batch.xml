@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
+
+    <import resource="classpath:applicationContext-batch.xml"/>
+
+    <util:properties id="batch" location="classpath:properties/batch.properties"/>
+
+    <bean id="job_sample">
+    </bean>
+
+    <bean id="job_sampleDetails" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="org.batch.quartz.JobLauncherDetails"/>
+        <property name="group" value="sample"/>
+        <property name="name" value="sample"/>
+        <property name="description" value="샘플 배치 실행"/>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="jobLauncher" value-ref="jobLauncher"/>
+                <entry key="job" value-ref="job_sample"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="cronTrigger_sampleScheduleLauncherDetails"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="job_sampleDetails"/>
+        <property name="cronExpression" value="#{batch['batch.sample.cronExpression']}"/>
+    </bean>
+
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="configLocation" value="classpath:properties/quartz.properties"/>
+        <property name="triggers">
+            <list>
+                <ref bean="cronTrigger_sampleScheduleLauncherDetails"/>
+            </list>
+        </property>
+    </bean>
+
+    <!--Core-->
+    <bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
+
+    </bean>
+
+    <bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="jobRepository"/>
+        <property name="taskExecutor">
+            <bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
+        </property>
+    </bean>
+
+</beans>
