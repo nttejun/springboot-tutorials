@@ -1,4 +1,4 @@
-package org.batch.quartz.count;
+package org.batch.quartz.job;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -11,7 +11,7 @@ public class DoubleCountJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         log.info("------------------DoubleCount Job Start------------------");
-        for(int i=0; i<5; i++){
+        for(int i=0; i<1; i++){
             log.info("DoubleCountJob");
         }
         log.info("------------------DoubleCount Job End------------------");

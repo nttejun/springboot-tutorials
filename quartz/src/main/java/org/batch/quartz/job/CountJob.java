@@ -1,4 +1,4 @@
-package org.batch.quartz.count;
+package org.batch.quartz.job;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;

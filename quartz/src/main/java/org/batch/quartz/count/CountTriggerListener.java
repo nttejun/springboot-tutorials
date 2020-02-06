@@ -5,13 +5,13 @@ import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TriggerListener implements org.quartz.TriggerListener {
+public class CountTriggerListener implements org.quartz.TriggerListener {
 
-    private final Logger log = LoggerFactory.getLogger(TriggerListener.class);
+    private final Logger log = LoggerFactory.getLogger(CountTriggerListener.class);
 
     @Override
     public String getName() {
-        return TriggerListener.class.getSimpleName();
+        return CountTriggerListener.class.getSimpleName();
     }
 
     @Override
