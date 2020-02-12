@@ -1,9 +1,9 @@
-package org.tutorial.ehcache.stock.application;
+package org.tutorial.ehcache.stock.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.tutorial.ehcache.stock.domain.mapper.StockMapper;
-import org.tutorial.ehcache.stock.domain.model.Stock;
+import org.tutorial.ehcache.stock.mapper.StockMapper;
+import org.tutorial.ehcache.stock.model.Stock;
 
 @Service
 public class StockServiceImpl implements StockService {
@@ -17,5 +17,6 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public Stock insert(Stock stock) { return stockMapper.insert(stock); }
+    public Stock insert(Stock stock) {
+        return stockMapper.insert(stock); }
 }

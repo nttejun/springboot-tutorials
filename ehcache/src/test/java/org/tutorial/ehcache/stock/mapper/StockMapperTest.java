@@ -1,22 +1,23 @@
-package org.tutorial.ehcache.stock.domain.mapper;
+package org.tutorial.ehcache.stock.mapper;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.tutorial.ehcache.stock.application.StockServiceImpl;
-import org.tutorial.ehcache.stock.domain.model.Stock;
+import org.tutorial.ehcache.stock.mapper.StockMapper;
+import org.tutorial.ehcache.stock.model.Stock;
+import org.tutorial.ehcache.stock.service.StockServiceImpl;
 
 @SpringBootTest
 public class StockMapperTest {
 
     @Autowired
     private StockMapper stockMapper;
-
     @Test
     public void getStockCount(){
-        Stock stock = new Stock("stock2020021101", "우동 한 그릇", "구리 료헤이", "청조사");
-        Assert.assertEquals("10", stockMapper.getStockCount(stock));
+        Stock stock = new Stock("stock2020021101", "우동 한 그릇", "구리 료헤이", "청조사", 10);
+        Stock stockResult = stockMapper.getStockCount(stock);
+        Assert.assertEquals("10", stockResult.getStock());
     }
 
     @Test

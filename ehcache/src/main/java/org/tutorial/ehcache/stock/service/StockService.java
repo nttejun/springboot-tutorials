@@ -1,6 +1,6 @@
-package org.tutorial.ehcache.stock.application;
+package org.tutorial.ehcache.stock.service;
 
-import org.tutorial.ehcache.stock.domain.model.Stock;
+import org.tutorial.ehcache.stock.model.Stock;
 
 
 public interface StockService {

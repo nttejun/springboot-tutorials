@@ -1,8 +1,8 @@
-package org.tutorial.ehcache.stock.application;
+package org.tutorial.ehcache.stock.service;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.tutorial.ehcache.stock.domain.model.Stock;
+import org.tutorial.ehcache.stock.model.Stock;
 
 public class StockServiceImplTest {
     @Test
@@ -13,7 +13,7 @@ public class StockServiceImplTest {
     }
 
     @Test
-    public void insertManyStockData(){
+    public void insertManyStock(){
         StockServiceImpl stockService = new StockServiceImpl();
         for(int i=1; i<500; i++){
         Stock stock = new Stock("20200211"+i, i+"번 제목", i+"번 저자", i+"번 출판사", i);
@@ -22,7 +22,7 @@ public class StockServiceImplTest {
     }
 
     @Test
-    public void insertOneStockData(){
+    public void insertOneStock(){
         Stock stock;
         StockServiceImpl stockService = new StockServiceImpl();
             stock = new Stock("2020021100", "번 제목", "번 저자", "번 출판사", 0);

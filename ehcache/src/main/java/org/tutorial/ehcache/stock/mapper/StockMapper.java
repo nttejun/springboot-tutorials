@@ -1,8 +1,10 @@
-package org.tutorial.ehcache.stock.domain.mapper;
+package org.tutorial.ehcache.stock.mapper;
 
 import org.apache.ibatis.annotations.*;
-import org.tutorial.ehcache.stock.domain.model.Stock;
+import org.springframework.stereotype.Repository;
+import org.tutorial.ehcache.stock.model.Stock;
 
+@Repository
 @Mapper
 public interface StockMapper {
 
