@@ -76,7 +76,7 @@
         <mockito.version>1.10.19</mockito.version>
         <assertj.version>3.13.2</assertj.version>
 
-        <rabbitmq.version>2.0.1.RELEASE</rabbitmq.version>
+        <rabbitmq.version>2.2.3.RELEASE</rabbitmq.version>
     </properties>
 
     <dependencies>
