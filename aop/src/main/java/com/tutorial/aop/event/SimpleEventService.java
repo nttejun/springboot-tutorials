@@ -1,4 +1,4 @@
-package com.tutorial.aop;
+package com.tutorial.aop.event;
 
 import org.springframework.stereotype.Service;
 

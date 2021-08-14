@@ -1,4 +1,4 @@
-package com.tutorial.aop;
+package com.tutorial.aop.event;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
