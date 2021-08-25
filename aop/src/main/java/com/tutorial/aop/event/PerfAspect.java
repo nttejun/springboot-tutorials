@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Aspect // Aspect 라는 것을 명시
 public class PerfAspect  {
 
-  @Around("execution(* com.tutorial.*.EventService.*(..))")
+  @Around("execution(* com.tutorial.aop.*.EventService.*(..))")
   public Object logPerf(ProceedingJoinPoint pjp) throws Throwable {
     long begin = System.currentTimeMillis();
     Object retVal = pjp.proceed();
