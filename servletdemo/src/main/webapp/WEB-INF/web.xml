@@ -5,6 +5,20 @@
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
   
+  <listener>
+    <listener-class>org.tutorials.servletdemo.DemoListener</listener-class>
+  </listener>
+
+  <filter>
+    <filter-name>demoFilter</filter-name>
+    <filter-class>org.tutorials.servletdemo.DemoFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>demoFilter</filter-name>
+    <servlet-name>hello</servlet-name>
+  </filter-mapping>
+  
   <servlet>
     <servlet-name>hello</servlet-name>
     <servlet-class>org.tutorials.servletdemo.HelloServlet</servlet-class>
