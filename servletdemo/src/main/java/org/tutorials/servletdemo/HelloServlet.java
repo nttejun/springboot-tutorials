@@ -5,6 +5,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.springframework.context.ApplicationContext;
 
 public class HelloServlet extends HttpServlet {
 
@@ -15,16 +16,15 @@ public class HelloServlet extends HttpServlet {
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    ApplicationContext context = (ApplicationContext) getServletContext();
+    HelloService helloService = context.getBean(HelloService.class);
+
     System.out.println("doGet");
     res.getWriter().println("<html>");
     res.getWriter().println("<head>");
-    res.getWriter().println("<h1>servlet + " + getName() + "</h1>");
+    res.getWriter().println("<h1>servlet + " + helloService.getName() + "</h1>");
     res.getWriter().println("</head>");
     res.getWriter().println("</html>");
-  }
-
-  private Object getName() {
-    return getServletContext().getAttribute("name");
   }
 
   @Override

@@ -4,10 +4,16 @@
 
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
-  
-  <listener>
-    <listener-class>org.tutorials.servletdemo.DemoListener</listener-class>
-  </listener>
+
+  <context-param>
+    <param-name>contextClass</param-name>
+    <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>org.tutorials.servletdemo.AppConfig</param-value>
+  </context-param>
 
   <filter>
     <filter-name>demoFilter</filter-name>
@@ -18,12 +24,20 @@
     <filter-name>demoFilter</filter-name>
     <servlet-name>hello</servlet-name>
   </filter-mapping>
-  
+
+  <listener>
+    <listener-class>org.tutorials.servletdemo.DemoListener</listener-class>
+  </listener>
+
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
   <servlet>
     <servlet-name>hello</servlet-name>
     <servlet-class>org.tutorials.servletdemo.HelloServlet</servlet-class>
   </servlet>
-  
+
   <servlet-mapping>
     <servlet-name>hello</servlet-name>
     <url-pattern>/hello</url-pattern>
