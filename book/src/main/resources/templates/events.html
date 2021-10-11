@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<h1>이벤트 목록</h1>
+<table>
+  <tr>
+    <th>이름</th>
+    <th>인원</th>
+  </tr>
+  <tr th:each="event: ${events}">
+    <td th:text="${event.name}">이벤트 이름</td>
+    <td th:text="${event.limitOfEnrollment}">이벤트 인원</td>
+  </tr>
+</table>
+</body>
+</html>
