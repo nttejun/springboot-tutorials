@@ -4,15 +4,16 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tutorials.querydsl.entity.Customer;
 import com.tutorials.querydsl.entity.QCustomer;
 import javax.persistence.EntityManager;
-import org.aspectj.lang.annotation.Before;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
+@Commit
 class QuerydslApplicationTests {
 
 	@Autowired
@@ -39,17 +40,17 @@ class QuerydslApplicationTests {
 		entityManager.persist(customer);
 
 		JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
-		QCustomer qCustomer = new QCustomer("hello");
+		QCustomer qCustomer = new QCustomer("hi");
 
 		Customer selectedCustomer = queryFactory
 				.selectFrom(qCustomer)
-				.fetchOne();
+				.orderBy(qCustomer.id.desc())
+				.fetchFirst();
 
 		Assertions.assertThat(selectedCustomer.getId()).isEqualTo(customer.getId());
 	}
 
 	@Test
 	void contextLoads() {
-
 	}
 }
