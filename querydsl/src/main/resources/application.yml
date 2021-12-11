@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/Install/h2/localdb/querydsl
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+#        sout 표시되지 않도록 주석처리
+#        show_sql: true
+        format_sql: true
+
+logging.level:
+  org.hibernate.SQL: debug
