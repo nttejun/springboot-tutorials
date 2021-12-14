@@ -36,7 +36,7 @@ class QuerydslApplicationTests {
 
 	@Test
 	public void 프로젝트_롬복_설정_성공_테스트(){
-		Customer customer = new Customer();
+		Customer customer = new Customer("Jun", "j", "1234", "01099990000", "jun@gmail.com", 'M');
 		entityManager.persist(customer);
 
 		JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
