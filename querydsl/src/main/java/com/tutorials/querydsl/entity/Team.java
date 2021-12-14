@@ -22,7 +22,7 @@ public class Team {
   @OneToMany(mappedBy = "team")
   private List<Member> members = new ArrayList<>();
 
-  protected Team(String name) {
+  public Team(String name) {
     this.name = name;
   }
 }
