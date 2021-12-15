@@ -135,4 +135,28 @@ public class QuerydslBasicTest {
     Assertions.assertThat(memberB.getUsername()).isEqualTo("memberB");
     Assertions.assertThat(memberD.getUsername()).isEqualTo(null);
   }
+
+  @Test
+  public void paging() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<Member> memberList = queryFactory
+        .selectFrom(member)
+        .orderBy(member.username.desc())
+        .offset(1)
+        .limit(2)
+        .fetch();
+
+    QueryResults<Member> memberResults = queryFactory
+        .selectFrom(member)
+        .orderBy(member.username.desc())
+        .offset(0)
+        .limit(4)
+        .fetchResults();
+
+    Assertions.assertThat(memberList.size()).isEqualTo(2);
+    Assertions.assertThat(memberResults.getTotal()).isEqualTo(4);
+    Assertions.assertThat(memberResults.getResults().size()).isEqualTo(4);
+    Assertions.assertThat(memberResults.getOffset()).isEqualTo(0);
+    Assertions.assertThat(memberResults.getLimit()).isEqualTo(4);
+  }
 }
