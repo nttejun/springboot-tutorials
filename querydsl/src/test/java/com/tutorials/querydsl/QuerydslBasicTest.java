@@ -1,5 +1,7 @@
 package com.tutorials.querydsl;
 
+import static com.tutorials.querydsl.entity.QMember.member;
+
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tutorials.querydsl.entity.Member;
 import com.tutorials.querydsl.entity.QMember;
@@ -10,10 +12,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
+@Commit
 public class QuerydslBasicTest {
 
   @Autowired
@@ -54,6 +58,44 @@ public class QuerydslBasicTest {
         .select(m)
         .from(m)
         .where(m.username.eq("memberA"))
+        .fetchOne();
+
+    Assertions.assertThat(findMember.getUsername()).isEqualTo("memberA");
+  }
+
+  @Test
+  public void startQuesydslImportStaticQEntity() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    Member findMember = queryFactory
+        .select(member)
+        .from(member)
+        .where(member.username.eq("memberA"))
+        .fetchOne();
+
+    Assertions.assertThat(findMember.getUsername()).isEqualTo("memberA");
+  }
+
+  @Test
+  public void search() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    Member findMember = queryFactory
+        .selectFrom(member)
+        .where(member.username.eq("memberA")
+            .and(member.age.eq(12)))
+        .fetchOne();
+
+    Assertions.assertThat(findMember.getUsername()).isEqualTo("memberA");
+  }
+
+  @Test
+  public void searchAndParam() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    Member findMember = queryFactory
+        .selectFrom(member)
+        .where(
+            member.username.eq("memberA"),
+            member.age.eq(12)
+        )
         .fetchOne();
 
     Assertions.assertThat(findMember.getUsername()).isEqualTo("memberA");
