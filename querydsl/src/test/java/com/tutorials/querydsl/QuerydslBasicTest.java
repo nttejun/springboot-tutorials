@@ -2,10 +2,12 @@ package com.tutorials.querydsl;
 
 import static com.tutorials.querydsl.entity.QMember.member;
 
+import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tutorials.querydsl.entity.Member;
 import com.tutorials.querydsl.entity.QMember;
 import com.tutorials.querydsl.entity.Team;
+import java.util.List;
 import javax.persistence.EntityManager;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +45,8 @@ public class QuerydslBasicTest {
 
   @Test
   public void startJPQL() {
-    Member findMember = entityManager.createQuery("select m from Member m where m.username = :username", Member.class)
+    Member findMember = entityManager
+        .createQuery("select m from Member m where m.username = :username", Member.class)
         .setParameter("username", "memberA")
         .getSingleResult();
 
@@ -99,5 +102,20 @@ public class QuerydslBasicTest {
         .fetchOne();
 
     Assertions.assertThat(findMember.getUsername()).isEqualTo("memberA");
+  }
+
+  @Test
+  public void resultFetch() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    QueryResults<Member> fetchResults = queryFactory
+        .selectFrom(member)
+        .fetchResults();
+
+    fetchResults.getTotal();
+
+    List<Member> content = fetchResults.getResults();
+
+    Assertions.assertThat(fetchResults.getTotal() == 4);
+    Assertions.assertThat(content.size() == 4);
   }
 }
