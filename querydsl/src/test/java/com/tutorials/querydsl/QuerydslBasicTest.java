@@ -33,10 +33,10 @@ public class QuerydslBasicTest {
     entityManager.persist(teamB);
 
     Member memberA = new Member("memberA", 12, teamA);
-    Member memberB = new Member("memberB", 13, teamA);
+    Member memberB = new Member("memberB", 12, teamA);
 
     Member memberC = new Member("memberC", 14, teamB);
-    Member memberD = new Member("memberD", 15, teamB);
+    Member memberD = new Member(null, 12, teamB);
     entityManager.persist(memberA);
     entityManager.persist(memberB);
     entityManager.persist(memberC);
@@ -117,5 +117,22 @@ public class QuerydslBasicTest {
 
     Assertions.assertThat(fetchResults.getTotal() == 4);
     Assertions.assertThat(content.size() == 4);
+  }
+
+  @Test
+  public void sort() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<Member> fetchOrderBy = queryFactory
+        .selectFrom(member)
+        .where(member.age.eq(12))
+        .orderBy(member.age.desc(), member.username.asc().nullsLast())
+        .fetch();
+
+    Member memberA = fetchOrderBy.get(0);
+    Member memberB = fetchOrderBy.get(1);
+    Member memberD = fetchOrderBy.get(2);
+    Assertions.assertThat(memberA.getUsername()).isEqualTo("memberA");
+    Assertions.assertThat(memberB.getUsername()).isEqualTo("memberB");
+    Assertions.assertThat(memberD.getUsername()).isEqualTo(null);
   }
 }
