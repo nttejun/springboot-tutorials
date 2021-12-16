@@ -1,8 +1,10 @@
 package com.tutorials.querydsl;
 
 import static com.tutorials.querydsl.entity.QMember.member;
+import static com.tutorials.querydsl.entity.QTeam.team;
 
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tutorials.querydsl.entity.Member;
 import com.tutorials.querydsl.entity.QMember;
@@ -158,5 +160,45 @@ public class QuerydslBasicTest {
     Assertions.assertThat(memberResults.getResults().size()).isEqualTo(4);
     Assertions.assertThat(memberResults.getOffset()).isEqualTo(0);
     Assertions.assertThat(memberResults.getLimit()).isEqualTo(4);
+  }
+
+  @Test
+  public void aggregation() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<Tuple> result = queryFactory
+        .select(
+            member.count(),
+            member.age.sum(),
+            member.age.avg(),
+            member.age.max(),
+            member.age.min()
+        )
+        .from(member)
+        .fetch();
+
+    Tuple tuple = result.get(0);
+    Assertions.assertThat(tuple.get(member.age.max())).isEqualTo(14);
+    Assertions.assertThat(tuple.get(member.count())).isEqualTo(4);
+    Assertions.assertThat(tuple.get(member.age.min())).isEqualTo(12);
+  }
+
+  @Test
+  public void group() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<Tuple> result = queryFactory
+        .select(team.name, member.age.avg())
+        .from(member)
+        .join(member.team, team)
+        .groupBy(team.name)
+        .fetch();
+
+    Tuple teamA = result.get(0);
+    Tuple teamB = result.get(1);
+
+    Assertions.assertThat(teamA.get(team.name)).isEqualTo("teamA");
+    Assertions.assertThat(teamA.get(member.age.avg())).isEqualTo("12.0");
+
+    Assertions.assertThat(teamB.get(team.name)).isEqualTo("teamB");
+    Assertions.assertThat(teamB.get(member.age.avg())).isEqualTo("14.0");
   }
 }
