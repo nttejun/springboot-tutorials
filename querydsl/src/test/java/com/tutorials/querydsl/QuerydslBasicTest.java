@@ -201,4 +201,53 @@ public class QuerydslBasicTest {
     Assertions.assertThat(teamB.get(team.name)).isEqualTo("teamB");
     Assertions.assertThat(teamB.get(member.age.avg())).isEqualTo(13);
   }
+
+  @Test
+  public void join() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<Member> result = queryFactory
+        .selectFrom(member)
+        .join(member.team, team)
+        .where(team.name.eq("teamA"))
+        .fetch();
+
+    Assertions.assertThat(result)
+        .extracting("username")
+        .containsExactly("memberA", "memberB");
+  }
+
+  @Test
+  public void leftJoin() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<Member> result = queryFactory
+        .selectFrom(member)
+        .leftJoin(member.team, team)
+        .where(team.name.eq("teamA"))
+        .fetch();
+
+    Assertions.assertThat(result)
+        .extracting("username")
+        .containsExactly("memberA", "memberB");
+  }
+
+  /***
+   * 세타 조인 : 연관관계 없는 상태에서 조인 (모든 회원, 모든 팀을 조회해서 where 조건에 맞는 값을 찾습니다)
+   * 회원 이름이 팀 이름과 같은 회원을 조회
+   * 세타 조인은 외부(outer) 조인 불가능 > join on 사용하면 외부(outer) 조인 가능
+   */
+  @Test
+  public void thetaJoin() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    entityManager.persist(new Member("teamA"));
+    entityManager.persist(new Member("teamB"));
+    List<Member> result = queryFactory
+        .select(member)
+        .from(member, team)
+        .where(member.username.eq(team.name))
+        .fetch();
+
+    Assertions.assertThat(result)
+        .extracting("username")
+        .containsExactly("teamA", "teamB");
+  }
 }
