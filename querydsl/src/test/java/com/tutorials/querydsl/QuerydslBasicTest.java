@@ -5,6 +5,7 @@ import static com.tutorials.querydsl.entity.QTeam.team;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tutorials.querydsl.entity.Member;
@@ -463,6 +464,57 @@ public class QuerydslBasicTest {
             + "";
 
     Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
 
+  @Test
+  public void basicCase() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<String> result = queryFactory
+        .select(member.age
+            .when(10).then("열살")
+            .when(11).then("열한살")
+            .when(12).then("열두살")
+            .when(13).then("열세살")
+            .when(14).then("열네살")
+            .when(15).then("열다섯살")
+            .otherwise("미포함"))
+        .from(member)
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (String age : result) {
+      resultPrint.append("age : " + age + "\n");
+    }
+
+    Assertions.assertThat(resultPrint.toString()).isEqualTo("test");
+  }
+
+  /***
+   * DB 에서는 row 데이터를 필터링, 그룹핑하는 용도로 데이터를 줄이는 최소한의 작업만 처리하고
+   * 케이스와 같은 처리는 age만 가져와서 애플리케이션 또는 프레젠테이션에서 처리해야 합니다
+   */
+  @Test
+  public void complextCase() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<String> result = queryFactory
+        .select(new CaseBuilder()
+            .when(member.age.between(0, 20)).then("0~20살")
+            .when(member.age.between(21, 30)).then("21~30살")
+            .otherwise("기타"))
+        .from(member)
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (String s : result) {
+      resultPrint.append(s + "\n");
+    }
+
+    String expected = "0~20살\n"
+        + "0~20살\n"
+        + "0~20살\n"
+        + "0~20살\n"
+        + "0~20살\n"
+        + "";
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
   }
 }
