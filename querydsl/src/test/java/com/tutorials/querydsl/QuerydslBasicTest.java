@@ -31,18 +31,22 @@ public class QuerydslBasicTest {
   public void before() {
     Team teamA = new Team("teamA");
     Team teamB = new Team("teamB");
+    Team teamE = new Team("teamE");
     entityManager.persist(teamA);
     entityManager.persist(teamB);
+    entityManager.persist(teamE);
 
     Member memberA = new Member("memberA", 12, teamA);
     Member memberB = new Member("memberB", 12, teamA);
 
     Member memberC = new Member("memberC", 14, teamB);
     Member memberD = new Member(null, 12, teamB);
+    Member memberE = new Member("teamE", 12, teamE);
     entityManager.persist(memberA);
     entityManager.persist(memberB);
     entityManager.persist(memberC);
     entityManager.persist(memberD);
+    entityManager.persist(memberE);
   }
 
   @Test
@@ -219,6 +223,7 @@ public class QuerydslBasicTest {
   @Test
   public void leftJoin() {
     JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    entityManager.persist(new Member("teamB", 15));
     List<Member> result = queryFactory
         .selectFrom(member)
         .leftJoin(member.team, team)
@@ -249,5 +254,67 @@ public class QuerydslBasicTest {
     Assertions.assertThat(result)
         .extracting("username")
         .containsExactly("teamA", "teamB");
+  }
+
+  /***
+   * JOIN ON (JPA 2.1 부터 지원)
+   * 조인 대상 필터링
+   * 연관관계 없는 엔티티 외부(outer) 조인
+   * 조인 대상을 할 때 외부조인이 아니라
+   * 내부조인(inner join)을 사용하면 where 절에서 필터링 하는 것과 기능이 동일하므로 익숙한 where 절을 사용하면 된다
+   * 회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인, 회원은 모두 조회한다
+   */
+  @Test
+  public void joinOn() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<Tuple> result = queryFactory
+        .select(member, team)
+        .from(member)
+        .leftJoin(member.team, team).on(team.name.eq("teamA"))
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (Tuple tuple : result) {
+      resultPrint.append("tuple : " + tuple+"\n");
+    }
+
+    String expectedResult =
+        "tuple : [Member(id=4, username=memberA, age=12), Team(id=1, name=teamA)]\n"
+            + "tuple : [Member(id=5, username=memberB, age=12), Team(id=1, name=teamA)]\n"
+            + "tuple : [Member(id=6, username=memberC, age=14), null]\n"
+            + "tuple : [Member(id=7, username=null, age=12), null]\n"
+            + "tuple : [Member(id=8, username=teamE, age=12), null]\n"
+            + "";
+
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expectedResult);
+  }
+
+  /***
+   * 연관관계 없는 엔티티 외부(outer) 조인
+   * 회원 이름과 팀 이름이 같은 대상을 외부 조인
+   */
+  @Test
+  public void joinOnNoRelation() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<Tuple> result = queryFactory
+        .select(member, team)
+        .from(member)
+        .leftJoin(team).on(member.username.eq(team.name))
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+
+    for (Tuple tuple : result) {
+      resultPrint.append("tuple : " + tuple +"\n");
+    }
+
+    String expected = "tuple : [Member(id=4, username=memberA, age=12), null]\n"
+        + "tuple : [Member(id=5, username=memberB, age=12), null]\n"
+        + "tuple : [Member(id=6, username=memberC, age=14), null]\n"
+        + "tuple : [Member(id=7, username=null, age=12), null]\n"
+        + "tuple : [Member(id=8, username=teamE, age=12), Team(id=3, name=teamE)]\n"
+        + "";
+
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
   }
 }
