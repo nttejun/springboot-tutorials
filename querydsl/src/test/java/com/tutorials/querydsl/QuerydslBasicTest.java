@@ -6,6 +6,7 @@ import static com.tutorials.querydsl.entity.QTeam.team;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tutorials.querydsl.entity.Member;
@@ -515,6 +516,48 @@ public class QuerydslBasicTest {
         + "0~20살\n"
         + "0~20살\n"
         + "";
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
+
+  @Test
+  public void constant() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<Tuple> result = queryFactory
+        .select(member.username, Expressions.constant("A"))
+        .from(member)
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (Tuple t : result) {
+      resultPrint.append(t + "\n");
+    }
+
+    String expected = "[memberA, A]\n"
+        + "[memberB, A]\n"
+        + "[memberC, A]\n"
+        + "[null, A]\n"
+        + "[teamE, A]\n"
+        + "";
+
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
+
+  @Test
+  public void concat() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<String> result = queryFactory
+        .select(member.username.concat("_").concat(member.age.stringValue()))
+        .from(member)
+        .where(member.username.eq("memberA"))
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (String t : result) {
+      resultPrint.append(t + "\n");
+    }
+
+    String expected = "memberA_12\n";
+
     Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
   }
 }
