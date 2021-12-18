@@ -11,6 +11,8 @@ import com.tutorials.querydsl.entity.QMember;
 import com.tutorials.querydsl.entity.Team;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -316,5 +318,45 @@ public class QuerydslBasicTest {
         + "";
 
     Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
+
+  @PersistenceUnit
+  EntityManagerFactory emf;
+
+  @Test
+  public void fetchJoinNo() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    entityManager.flush();
+    entityManager.clear();
+
+    Member findMember = queryFactory
+        .selectFrom(member)
+        .where(member.username.eq("memberA"))
+        .fetchOne();
+
+    boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+    Assertions.assertThat(loaded).as("패치 조인 미적용").isFalse();
+  }
+
+  /***
+   * fetch 조인을 사용하면 내부 조인을 사용할 수 있다
+   * inner join
+   *   team team1_
+   *     on member0_.team_id=team1_.team_id
+   */
+  @Test
+  public void fetchJoinUse() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    entityManager.flush();
+    entityManager.clear();
+
+    Member findMember = queryFactory
+        .selectFrom(member)
+        .join(member.team, team).fetchJoin()
+        .where(member.username.eq("memberA"))
+        .fetchOne();
+
+    boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+    Assertions.assertThat(loaded).as("패치 조인 적용").isTrue();
   }
 }
