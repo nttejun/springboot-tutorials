@@ -5,6 +5,7 @@ import static com.tutorials.querydsl.entity.QTeam.team;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tutorials.querydsl.entity.Member;
 import com.tutorials.querydsl.entity.QMember;
@@ -277,7 +278,7 @@ public class QuerydslBasicTest {
 
     StringBuffer resultPrint = new StringBuffer();
     for (Tuple tuple : result) {
-      resultPrint.append("tuple : " + tuple+"\n");
+      resultPrint.append("tuple : " + tuple + "\n");
     }
 
     String expectedResult =
@@ -307,7 +308,7 @@ public class QuerydslBasicTest {
     StringBuffer resultPrint = new StringBuffer();
 
     for (Tuple tuple : result) {
-      resultPrint.append("tuple : " + tuple +"\n");
+      resultPrint.append("tuple : " + tuple + "\n");
     }
 
     String expected = "tuple : [Member(id=4, username=memberA, age=12), null]\n"
@@ -358,5 +359,110 @@ public class QuerydslBasicTest {
 
     boolean loaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
     Assertions.assertThat(loaded).as("패치 조인 적용").isTrue();
+  }
+
+  /***
+   * 서브쿼리 com.querydsl.jpa.JPAExpressions 사용
+   * JPA JPQL 서브쿼리 한계점으로는 from 절의 서브쿼리가 지원되지 않습니다
+   * 해결방안
+   * 1. 서브쿼리를 join으로 변경한다 (불가능한 상황도 있다)
+   * 2. 어플리케이션에서 쿼리를 2번 분리해서 실행한다
+   * 3. nativeSQL을 사용한다
+   *
+   * 상황 : 나이가 가장 많은 회원 조회
+   */
+  @Test
+  public void subQuery() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+
+    QMember memberSub = new QMember("memberSub");
+
+    List<Member> result = queryFactory
+        .selectFrom(member)
+        .where(member.age.eq(
+            JPAExpressions
+                .select(memberSub.age.max())
+                .from(memberSub)
+        ))
+        .fetch();
+
+    Assertions.assertThat(result).extracting("age")
+        .containsExactly(14);
+  }
+
+  /***
+   * 서브쿼리 com.querydsl.jpa.JPAExpressions 사용
+   * 상황 : 나이가 평균 이상인 회원 조회
+   */
+  @Test
+  public void subQueryGoe() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+
+    QMember memberSub = new QMember("memberSub");
+
+    List<Member> result = queryFactory
+        .selectFrom(member)
+        .where(member.age.goe(
+            JPAExpressions
+                .select(memberSub.age.avg())
+                .from(memberSub)
+        ))
+        .fetch();
+
+    Assertions.assertThat(result).extracting("age")
+        .containsExactly(14);
+  }
+
+  /***
+   * 서브쿼리 인 com.querydsl.jpa.JPAExpressions 사용
+   * 나이가 11살 초과 회원 조회
+   */
+  @Test
+  public void subQueryIn() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+
+    QMember memberSub = new QMember("memberSub");
+
+    List<Member> result = queryFactory
+        .selectFrom(member)
+        .where(member.age.in(
+            JPAExpressions
+                .select(memberSub.age)
+                .from(memberSub)
+                .where(memberSub.age.gt(11))
+        ))
+        .fetch();
+
+    Assertions.assertThat(result).extracting("age")
+        .containsExactly(12, 12, 14, 12, 12);
+  }
+
+  @Test
+  public void selectSubquery() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    QMember memberSub = new QMember("memberSub");
+    List<Tuple> result = queryFactory
+        .select(member.username,
+            JPAExpressions
+                .select(memberSub.age.avg())
+                .from(memberSub))
+        .from(member)
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (Tuple t : result) {
+      resultPrint.append(t + "\n");
+    }
+
+    String expected =
+        "[memberA, 12.4]\n"
+            + "[memberB, 12.4]\n"
+            + "[memberC, 12.4]\n"
+            + "[null, 12.4]\n"
+            + "[teamE, 12.4]\n"
+            + "";
+
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+
   }
 }
