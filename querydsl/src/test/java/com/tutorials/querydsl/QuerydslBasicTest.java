@@ -560,4 +560,30 @@ public class QuerydslBasicTest {
 
     Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
   }
+
+  @Test
+  public void simpleProjection() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<Tuple> result = queryFactory
+        .select(member.username, member.age)
+        .from(member)
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+
+    for (Tuple tuple : result) {
+      String username = tuple.get(member.username);
+      Integer age = tuple.get(member.age);
+      resultPrint.append("username : " + username + " ");
+      resultPrint.append("age : " + age + " \n");
+    }
+
+    String expected = "username : memberA age : 12 \n"
+        + "username : memberB age : 12 \n"
+        + "username : memberC age : 14 \n"
+        + "username : null age : 12 \n"
+        + "username : teamE age : 12 \n"
+        + "";
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
 }
