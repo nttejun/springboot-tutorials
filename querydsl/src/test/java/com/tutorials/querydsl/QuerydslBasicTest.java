@@ -5,10 +5,14 @@ import static com.tutorials.querydsl.entity.QTeam.team;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tutorials.querydsl.dto.MemberDto;
+import com.tutorials.querydsl.dto.UserDto;
 import com.tutorials.querydsl.entity.Member;
 import com.tutorials.querydsl.entity.QMember;
 import com.tutorials.querydsl.entity.Team;
@@ -584,6 +588,211 @@ public class QuerydslBasicTest {
         + "username : null age : 12 \n"
         + "username : teamE age : 12 \n"
         + "";
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
+
+  /***
+   * 순수 JPA에서 DTO를 조회할 때 new 명령어를 사용해야 합니다
+   * DTO 패키지 이름 전체를 적어줘야 하므로 코드가 지저분 합니다
+   * 생성자 방식만 지원합니
+   */
+  @Test
+  public void findDtoByJPQL() {
+    List<MemberDto> resultList = entityManager.createQuery(
+        "select new com.tutorials.querydsl.dto.MemberDto(m.username, m.age) from Member m",
+        MemberDto.class)
+        .getResultList();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (MemberDto memberDto : resultList) {
+      resultPrint.append("memberDto : " + memberDto+"\n");
+    }
+
+    String expected = "memberDto : MemberDto(username=memberA, age=12)\n"
+        + "memberDto : MemberDto(username=memberB, age=12)\n"
+        + "memberDto : MemberDto(username=memberC, age=14)\n"
+        + "memberDto : MemberDto(username=null, age=12)\n"
+        + "memberDto : MemberDto(username=teamE, age=12)\n"
+        + "";
+
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
+
+  /***
+   * setter 사용
+   */
+  @Test
+  public void findDtoBySetter() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<MemberDto> result = queryFactory
+        .select(Projections.bean(MemberDto.class,
+            member.username,
+            member.age)
+        )
+        .from(member)
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (MemberDto memberDto : result) {
+      resultPrint.append("memberDto = " + memberDto +"\n");
+    }
+
+    String expected = "memberDto = MemberDto(username=memberA, age=12)\n"
+        + "memberDto = MemberDto(username=memberB, age=12)\n"
+        + "memberDto = MemberDto(username=memberC, age=14)\n"
+        + "memberDto = MemberDto(username=null, age=12)\n"
+        + "memberDto = MemberDto(username=teamE, age=12)\n"
+        + "";
+
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
+
+  /***
+   * 필드로 값을 직접 사용
+   */
+  @Test
+  public void findDtoByFeild() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<MemberDto> result = queryFactory
+        .select(Projections.fields(MemberDto.class,
+            member.username,
+            member.age)
+        )
+        .from(member)
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (MemberDto memberDto : result) {
+      resultPrint.append("memberDto = " + memberDto +"\n");
+    }
+
+    String expected = "memberDto = MemberDto(username=memberA, age=12)\n"
+        + "memberDto = MemberDto(username=memberB, age=12)\n"
+        + "memberDto = MemberDto(username=memberC, age=14)\n"
+        + "memberDto = MemberDto(username=null, age=12)\n"
+        + "memberDto = MemberDto(username=teamE, age=12)\n"
+        + "";
+
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
+
+  /***
+   * 생성자 사용 (타입이 일치해야함)
+   */
+  @Test
+  public void findDtoByConstructor() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<MemberDto> result = queryFactory
+        .select(Projections.constructor(MemberDto.class,
+            member.username,
+            member.age)
+        )
+        .from(member)
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (MemberDto memberDto : result) {
+      resultPrint.append("memberDto = " + memberDto +"\n");
+    }
+
+    String expected = "memberDto = MemberDto(username=memberA, age=12)\n"
+        + "memberDto = MemberDto(username=memberB, age=12)\n"
+        + "memberDto = MemberDto(username=memberC, age=14)\n"
+        + "memberDto = MemberDto(username=null, age=12)\n"
+        + "memberDto = MemberDto(username=teamE, age=12)\n"
+        + "";
+
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
+
+  /***
+   * 생성자 사용 (타입이 일치해야함) -> 매칭되지 않을 시 null
+   */
+  @Test
+  public void findUserDtoNullTest() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<UserDto> result = queryFactory
+        .select(Projections.fields(UserDto.class,
+            member.username,
+            member.age)
+        )
+        .from(member)
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (UserDto userDto : result) {
+      resultPrint.append("userDto = " + userDto +"\n");
+    }
+
+    String expected = "userDto = UserDto(name=null, age=12)\n"
+        + "userDto = UserDto(name=null, age=12)\n"
+        + "userDto = UserDto(name=null, age=14)\n"
+        + "userDto = UserDto(name=null, age=12)\n"
+        + "userDto = UserDto(name=null, age=12)\n"
+        + "";
+
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
+
+  /***
+   * 생성자 사용 (타입이 일치해야함) -> 매칭되지 않을 시 null -> as 동일 필드값으로 선언
+   */
+  @Test
+  public void findUserDto() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    List<UserDto> result = queryFactory
+        .select(Projections.fields(UserDto.class,
+            member.username.as("name"),
+            member.age)
+        )
+        .from(member)
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (UserDto userDto : result) {
+      resultPrint.append("userDto = " + userDto +"\n");
+    }
+
+    String expected = "userDto = UserDto(name=memberA, age=12)\n"
+        + "userDto = UserDto(name=memberB, age=12)\n"
+        + "userDto = UserDto(name=memberC, age=14)\n"
+        + "userDto = UserDto(name=null, age=12)\n"
+        + "userDto = UserDto(name=teamE, age=12)\n"
+        + "";
+
+    Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
+  }
+
+  /***
+   * 필드, 서브쿼리에 사용
+   */
+  @Test
+  public void findUserDtoSubQuery() {
+    JPAQueryFactory queryFactory = new JPAQueryFactory(entityManager);
+    QMember qMember = new QMember("memberSub");
+    List<UserDto> result = queryFactory
+        .select(Projections.fields(UserDto.class,
+            member.username.as("name"),
+
+            ExpressionUtils.as(JPAExpressions
+            .select(qMember.age.max())
+                .from(qMember), "age")
+        ))
+        .from(member)
+        .fetch();
+
+    StringBuffer resultPrint = new StringBuffer();
+    for (UserDto userDto : result) {
+      resultPrint.append("userDto = " + userDto +"\n");
+    }
+
+    String expected = "userDto = UserDto(name=memberA, age=14)\n"
+        + "userDto = UserDto(name=memberB, age=14)\n"
+        + "userDto = UserDto(name=memberC, age=14)\n"
+        + "userDto = UserDto(name=null, age=14)\n"
+        + "userDto = UserDto(name=teamE, age=14)\n"
+        + "";
+
     Assertions.assertThat(resultPrint.toString()).isEqualTo(expected);
   }
 }
